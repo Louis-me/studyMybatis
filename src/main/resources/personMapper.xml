@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="personMapper">
+    <!-- 定义封装person和IdCard的resultMap -->
+    <resultMap id="personIdCardMap" type="xyz.shi.domain.Person">
+        <id property="id" column="id"/>
+        <!--IdCard的id -->
+<!--        <result property="t_idCard_id" column="t_idCard_id"/>-->
+        <result property="name" column="name"/>
+        <!-- association配置一对一关系，property为Person中属性名，javaType为属性类型 -->
+        <association property="idCard" javaType="xyz.shi.domain.IdCard">
+            <!-- column="t_idCard_id 对应person表中的t_idCard_id-->
+            <id property="id" column="t_idCard_id"/>
+            <result property="cardNo" column="cardNo"/>
+        </association>
+    </resultMap>
+    <!--配置查询所有-->
+    <select id="findAll" resultMap="personIdCardMap">
+        select p.name, p.id as pid, c.id as cid, c.cardNo from t_person p, t_idCard c where c.id = p.t_idCard_id
+    </select>
+<!--    通过id(唯一)获取用户-->
+    <select id="queryOne" parameterType="int" resultMap="personIdCardMap">
+        select p.name, p.id as pid, c.id as cid, c.cardNo from t_person p, t_idCard c where c.id = p.t_idCard_id and p.id=#{id}
+
+    </select>
+    <!-- 插入 -->
+    <insert id="insertPerson" parameterType="Person">
+        insert into t_person (name,t_idCard_id) values(#{name},#{idCard.id})
+    </insert>
+
+    <update id="modifyPerson" parameterType="Person">
+        update t_person set name=#{name},t_idCard_id=#{idCard.id} where id=#{id}
+    </update>
+    <!-- 根据 id 删除 -->
+    <delete id="deletePerson" parameterType="int">
+        delete from t_person where id=#{id}
+    </delete>
+</mapper>

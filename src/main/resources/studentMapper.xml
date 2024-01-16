@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="studentMapper">
+    <!-- 定义封装resultMap
+     property 实体中对应的属性
+     column 数据库对应的列（select查询返回的列表）
+     -->
+    <resultMap type="xyz.shi.domain.Student" id="StudentGradeResult">
+    <id column="sid" jdbcType="BIGINT" property="id" />
+    <result column="sname" jdbcType="VARCHAR" property="name" />
+        <!-- 多对一关系的时候，多方使用association标签映射一方-->
+<!--        <association property="grade" resultMap="StudentResult"></association>-->
+        <association property="grade" javaType="xyz.shi.domain.Grade">
+            <id column="gid"  property="id" />
+            <result column="gname" property="name" />
+        </association>
+    </resultMap>
+
+    <resultMap type="xyz.shi.domain.Student" id="StudentCourseResult">
+        <id column="sid" jdbcType="BIGINT" property="id" />
+        <result column="sname" jdbcType="VARCHAR" property="name" />
+        <!-- 一对多 -->
+        <collection property="courses" ofType="xyz.shi.domain.Course">
+            <id property="id" column="cid"/>
+            <result property="name" column="cname"/>
+
+        </collection>
+    </resultMap>
+    <select id="queryOne" parameterType="int" resultMap="StudentCourseResult">
+        select s.name as sname,g.name as gname, g.id as gid, s.id as sid from student s,grade g where g.id = s.gid and s.id=#{id}
+    </select>
+    <select id="findAllStuCourse"  resultMap="StudentCourseResult">
+        SELECT c.name as cname, c.id as cid, s.id as sid, s.name as sname
+        FROM student s
+        INNER JOIN student_course sc ON s.id = sc.student_id
+        INNER JOIN course c ON sc.course_id = c.id
+    </select>
+
+    <insert id="insertStudent"  parameterType="xyz.shi.domain.Student"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO student (name, gid) VALUES (#{name}, #{grade.id})
+    </insert>
+    <!---学生关联多个课程 -->
+    <insert id="batchInsertStudentCourse">
+        INSERT INTO student_course (student_id, course_id)
+        VALUES
+        <foreach collection="courseIds" item="courseId" separator=",">
+            (#{studentId}, #{courseId})
+        </foreach>
+    </insert>
+    <update id="updateStudent" parameterType="Student">
+        UPDATE student
+        SET name = #{name}
+        WHERE id = #{id}
+    </update>
+    <update id="updateStudentCourse" parameterType="java.util.Map">
+        UPDATE student SET name = #{student.name} WHERE id = #{student.id};
+        <!-- 先清空关联关系，然后重写插入 -->
+        DELETE FROM student_course WHERE student_id = #{student.id};
+        <foreach collection="courseIds" item="courseId" separator=";">
+            INSERT INTO student_course (student_id, course_id) VALUES (#{student.id}, #{courseId})
+        </foreach>
+    </update>
+    <delete id="deleteStudentAndRelations" parameterType="int">
+        DELETE FROM student WHERE id = #{id};
+        DELETE FROM student_course WHERE student_id = #{id};
+    </delete>
+</mapper>
