@@ -52,10 +52,9 @@ public class PersonDaoTest {
     @Test
     public void TestAddPerson() {
         Person person = new Person();
-        person.setName("山大王");
+        person.setName("山大王1");
 
         IdCard idCard = new IdCard();
-        idCard.setCardNo("222");
         idCard.setId(14);
 
         person.setIdCard(idCard);

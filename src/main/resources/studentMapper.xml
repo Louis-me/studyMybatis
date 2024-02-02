@@ -64,8 +64,9 @@
             INSERT INTO student_course (student_id, course_id) VALUES (#{student.id}, #{courseId})
         </foreach>
     </update>
+    <!--请注意，在删除多对多关联关系时，只是在中间表中删除对应的记录，并不会删除用户或角色本身的记录。
+    如果需要删除用户或角色本身的记录，请编写相应的SQL语句并在对应的Mapper接口中定义相应的方法。 -->
     <delete id="deleteStudentAndRelations" parameterType="int">
-        DELETE FROM student WHERE id = #{id};
         DELETE FROM student_course WHERE student_id = #{id};
     </delete>
 </mapper>

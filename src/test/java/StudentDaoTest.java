@@ -91,6 +91,6 @@ public class StudentDaoTest {
     }
     @Test
     public void deleteStudentAndRelations() {
-        studentDao.deleteStudentAndRelations(44);
+        studentDao.deleteStudentAndRelations(42);
     }
 }
